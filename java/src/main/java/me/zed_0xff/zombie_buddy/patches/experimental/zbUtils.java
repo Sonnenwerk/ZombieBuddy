@@ -241,17 +241,45 @@ public class zbUtils {
         return Reflect.on(obj).field(name).set(value);
     }
 
+    private static boolean isAssignable(Class<?>[] types, Object[] args) {
+        if (types.length != args.length) return false;
+        for (int i = 0; i < types.length; i++) {
+            Class<?> target = types[i];
+            Object arg = args[i];
+            if (arg == null) {
+                if (target.isPrimitive()) return false;
+                continue;
+            }
+            Class<?> source = arg.getClass();
+            if (target.isAssignableFrom(source)) {
+                continue;
+            }
+            if (target.isPrimitive()) {
+                if (target == boolean.class && source == Boolean.class) continue;
+                if (target == byte.class && source == Byte.class) continue;
+                if (target == char.class && source == Character.class) continue;
+                if (target == short.class && (source == Short.class || source == Byte.class)) continue;
+                if (target == int.class && (source == Integer.class || source == Short.class || source == Byte.class || source == Character.class)) continue;
+                if (target == long.class && (source == Long.class || source == Integer.class || source == Short.class || source == Byte.class || source == Character.class)) continue;
+                if (target == float.class && (source == Float.class || source == Long.class || source == Integer.class || source == Short.class || source == Byte.class || source == Character.class)) continue;
+                if (target == double.class && (source == Double.class || source == Float.class || source == Long.class || source == Integer.class || source == Short.class || source == Byte.class || source == Character.class)) continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
     @LuaMethod(name = "zbcall", global = true)
     public static Object zbCall(Object obj, String name, Object... args) throws Exception {
         if (obj == null || Utils.isBlank(name)) {
             throw new IllegalArgumentException("object and method name must be provided");
         }
         for (Method m : Reflect.on(obj).methods()) {
-            if (m.getName().equals(name) && m.getParameterCount() == args.length) { // TODO: match parameter types?
+            if (m.getName().equals(name) && isAssignable(m.getParameterTypes(), args)) {
                 return m.invoke(obj, args);
             }
         }
-        throw new IllegalArgumentException("no matching method found: " + name + " with " + args.length + " args");
+        throw new IllegalArgumentException("no matching method found: " + name + " with matching args");
     }
 
     /**
