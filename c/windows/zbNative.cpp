@@ -6,6 +6,10 @@ HMODULE hOrig = NULL;
 #define ZB_JAR "ZombieBuddy.jar"
 #define AGENT_OPTIONS_MAX 2048
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Minimal DllMain to prevent CRT initialization
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
     return TRUE;
@@ -123,3 +127,6 @@ __declspec(dllexport) void Agent_OnUnload(void* jvm) {
     hOrig = NULL;
 }
 
+#ifdef __cplusplus
+}
+#endif
