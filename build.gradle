@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'me.zed_0xff.zombie_buddy'
+version = '2.4.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // oder 21/25 je nach Ziel-Build
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'net.bytebuddy:byte-buddy:1.14.12'
+    implementation 'net.bytebuddy:byte-buddy-agent:1.14.12'
+
+    // Optional: PZ Klassen lokal für Matching-Referenzen
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    manifest {
+        attributes(
+            'Premain-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
+            'Agent-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
+            'Can-Redefine-Classes': 'true',
+            'Can-Retransform-Classes': 'true'
+        )
+    }
+}
