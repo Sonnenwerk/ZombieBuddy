@@ -26,6 +26,11 @@ Dir["lib/tasks/*.rake.local"].each { |r| load r }
 
 task :default => [:build, :install]
 
+desc "build the windows installer"
+task :build_installer do
+  sh "cd installer && GOOS=windows GOARCH=amd64 go build -o ZombieBuddyInstaller.exe"
+end
+
 task :chdir do
   Dir.chdir("java")
 end
