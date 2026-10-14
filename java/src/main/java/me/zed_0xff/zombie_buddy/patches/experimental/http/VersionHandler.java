@@ -12,6 +12,7 @@ public class VersionHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         HttpServer.logRequest(exchange);
+        // Version endpoint is public
         String response = ZombieBuddy.getFullVersionString() + "\n";
         HttpServer.sendResponse(exchange, 200, response);
     }

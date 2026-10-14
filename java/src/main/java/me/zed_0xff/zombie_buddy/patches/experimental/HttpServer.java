@@ -33,6 +33,7 @@ public class HttpServer {
     private final String host;
     private int port;
     private boolean wasRandomPort;
+    private final String authPassword;
     private static HttpServer instance;
     
     // Timeout for waiting for Lua task execution (in milliseconds)
@@ -228,13 +229,14 @@ public class HttpServer {
     }
 
     public HttpServer(int port, boolean isRandomPort) {
-        this("127.0.0.1", port, isRandomPort);
+        this("127.0.0.1", port, isRandomPort, null);
     }
 
-    public HttpServer(String host, int port, boolean isRandomPort) {
+    public HttpServer(String host, int port, boolean isRandomPort, String authPassword) {
         this.host = !Utils.isBlank(host) ? host : "127.0.0.1";
         this.port = port;
         this.wasRandomPort = isRandomPort;
+        this.authPassword = authPassword;
     }
 
     public void start() throws IOException {
@@ -293,6 +295,29 @@ public class HttpServer {
             server.stop(0);
             Logger.info("HTTP server stopped");
         }
+    }
+
+    public boolean checkAuth(HttpExchange exchange) throws IOException {
+        if (Utils.isBlank(authPassword)) {
+            sendResponse(exchange, 401, "Unauthorized: Server requires authentication but no password is configured\n");
+            return false;
+        }
+
+        List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
+        if (authHeaders == null || authHeaders.isEmpty()) {
+            sendResponse(exchange, 401, "Unauthorized: Missing Authorization header\n");
+            return false;
+        }
+
+        String authHeader = authHeaders.get(0);
+        String expectedHeader = "Bearer " + authPassword;
+
+        if (!java.security.MessageDigest.isEqual(expectedHeader.getBytes(StandardCharsets.UTF_8), authHeader.getBytes(StandardCharsets.UTF_8))) {
+            sendResponse(exchange, 401, "Unauthorized: Invalid token\n");
+            return false;
+        }
+
+        return true;
     }
 
     public static void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {

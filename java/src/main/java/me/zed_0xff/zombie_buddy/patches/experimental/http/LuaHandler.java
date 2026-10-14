@@ -32,6 +32,11 @@ import me.zed_0xff.zombie_buddy.patches.experimental.HttpServer;
 public class LuaHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        HttpServer.logRequest(exchange);
+        if (!HttpServer.getInstance().checkAuth(exchange)) {
+            return;
+        }
+
         try {
             handleRequest(exchange);
         } catch (Throwable t) {
@@ -51,7 +56,6 @@ public class LuaHandler implements HttpHandler {
     }
 
     private static void handleRequest(HttpExchange exchange) throws Exception {
-        HttpServer.logRequest(exchange);
         if (!_lua_ready) {
             HttpServer.sendResponse(exchange, 503, "Lua not initialized yet\n");
             return;
