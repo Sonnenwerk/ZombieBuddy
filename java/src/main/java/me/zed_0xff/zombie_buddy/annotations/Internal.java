@@ -96,12 +96,9 @@ public final class Internal {
         private HandleStore() {}
     }
 
-    // TODO: remove
-    public interface AnnConverter {
-        AnnotationNode convert(AnnotationNode src, Object node, ClassContext ctx) throws Throwable;
-    }
+    public static abstract class AnnConverterBase {
+        public abstract AnnotationNode convert(AnnotationNode src, Object node, ClassContext ctx) throws Throwable;
 
-    public static abstract class AnnConverterBase implements AnnConverter {
         public static AnnotationNode createNode(Class<?> cls, Object... values) {
             AnnotationNode node = new AnnotationNode(Type.getDescriptor(cls));
             if (!Utils.isBlank(values)) {

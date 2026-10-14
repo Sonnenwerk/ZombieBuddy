@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.zed_0xff.zombie_buddy.Logger;
-import me.zed_0xff.zombie_buddy.annotations.Internal.AnnConverter;
+import me.zed_0xff.zombie_buddy.annotations.Internal.AnnConverterBase;
 import me.zed_0xff.zombie_buddy.annotations.Internal.Meta;
 import me.zed_0xff.zombie_buddy.annotations.Patch;
 import me.zed_0xff.zombie_buddy.annotations.Shadow;
@@ -20,7 +20,7 @@ public class AnnCache {
             Class<?> cls, 
             TypeDescription td, 
             Meta[] metas,
-            AnnConverter annConverter
+            AnnConverterBase annConverter
     ) {
         public Meta getMeta(boolean isAdvice) {
             for (Meta meta : metas) {
@@ -42,14 +42,14 @@ public class AnnCache {
             if (!c.isAnnotation()) continue;
 
             var annConverterCls = Arrays.stream(c.getDeclaredClasses())
-                .filter(dc -> AnnConverter.class.isAssignableFrom(dc)) // assuming there is only one AnnConverter
+                .filter(dc -> AnnConverterBase.class.isAssignableFrom(dc)) // assuming there is only one AnnConverter
                 .findFirst()
                 .orElse(null);
 
-            AnnConverter annConverter = null;
+            AnnConverterBase annConverter = null;
             if (annConverterCls != null) {
                 try {
-                    annConverter = (AnnConverter) annConverterCls.getDeclaredConstructor().newInstance();
+                    annConverter = (AnnConverterBase) annConverterCls.getDeclaredConstructor().newInstance();
                 } catch (Throwable t) {
                     Logger.error("Failed to instantiate AnnConverter for " + c.getName(), t);
                 }
