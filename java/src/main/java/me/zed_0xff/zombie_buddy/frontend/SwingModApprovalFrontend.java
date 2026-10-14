@@ -36,8 +36,8 @@ public final class SwingModApprovalFrontend implements ModApprovalFrontend {
         Path tmpIn = null;
         Path tmpOut = null;
         try {
-            tmpIn = java.nio.file.Files.createTempFile("zb-batch-req-", ".json");
-            tmpOut = java.nio.file.Files.createTempFile("zb-batch-resp-", ".json");
+            tmpIn = Utils.createSecureTempFile("zb-batch-req-", ".json");
+            tmpOut = Utils.createSecureTempFile("zb-batch-resp-", ".json");
             JarBatchApprovalProtocol.writeRequest(tmpIn, pending);
             String javaExe = Path.of(
                 System.getProperty("java.home"),

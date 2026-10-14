@@ -17,6 +17,32 @@ import java.util.regex.Pattern;
 public final class Utils {
     private Utils() {}
 
+    public static Path createSecureTempFile(Path dir, String prefix, String suffix) throws IOException {
+        if (java.nio.file.FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+            java.nio.file.attribute.FileAttribute<java.util.Set<java.nio.file.attribute.PosixFilePermission>> attr =
+                java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+                    java.util.EnumSet.of(
+                        java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_WRITE));
+            return dir == null ? java.nio.file.Files.createTempFile(prefix, suffix, attr)
+                               : java.nio.file.Files.createTempFile(dir, prefix, suffix, attr);
+        } else {
+            Path tempFile = dir == null ? java.nio.file.Files.createTempFile(prefix, suffix)
+                                        : java.nio.file.Files.createTempFile(dir, prefix, suffix);
+            java.io.File f = tempFile.toFile();
+            f.setReadable(false, false);
+            f.setWritable(false, false);
+            f.setExecutable(false, false);
+            f.setReadable(true, true);
+            f.setWritable(true, true);
+            return tempFile;
+        }
+    }
+
+    public static Path createSecureTempFile(String prefix, String suffix) throws IOException {
+        return createSecureTempFile(null, prefix, suffix);
+    }
+
     /** Converts a canonical/binary class name (dots) to an ASM internal name (slashes). */
     public static String toInternalName(String className) { return className.replace('.', '/'); }
 
@@ -271,7 +297,7 @@ public final class Utils {
     public static void writeFileAtomic(Path target, String content, Charset charset) throws IOException {
         Path dir = target.getParent();
         if (dir != null) Files.createDirectories(dir);
-        Path tmp = Files.createTempFile(dir, target.getFileName().toString(), ".tmp");
+        Path tmp = createSecureTempFile(dir, target.getFileName().toString(), ".tmp");
         try {
             Files.writeString(tmp, content, charset);
             try {
