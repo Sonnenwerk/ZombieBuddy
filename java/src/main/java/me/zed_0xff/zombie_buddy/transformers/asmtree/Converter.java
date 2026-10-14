@@ -16,7 +16,7 @@ import me.zed_0xff.zombie_buddy.Logger;
 import me.zed_0xff.zombie_buddy.Reflect;
 import me.zed_0xff.zombie_buddy.Utils;
 import me.zed_0xff.zombie_buddy.annotations.Internal;
-import me.zed_0xff.zombie_buddy.annotations.Internal.AnnConverter;
+import me.zed_0xff.zombie_buddy.annotations.Internal.AnnConverterBase;
 import me.zed_0xff.zombie_buddy.annotations.Internal.Meta;
 import me.zed_0xff.zombie_buddy.annotations.Patch;
 import me.zed_0xff.zombie_buddy.jardump.AsmDump;
@@ -132,7 +132,7 @@ public class Converter extends AbstractTransformer {
     }
 
     private AnnotationNode translated(Object node, AnnotationNode src, AnnInfo ai) {
-        AnnConverter conv = ai.annConverter();
+        AnnConverterBase conv = ai.annConverter();
         if (conv != null) {
             try {
                 return conv.convert(src, node, m_ctx);
