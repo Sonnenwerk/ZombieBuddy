@@ -537,7 +537,7 @@ func detectPZPath(steamPath string) (string, error) {
 	// Then check libraryfolders.vdf
 	libraryVDF := filepath.Join(steamPath, "steamapps", "libraryfolders.vdf")
 	if _, err := os.Stat(libraryVDF); err == nil {
-		return findAppInLibraries(libraryVDF, "common", "ProjectZomboid")
+		return findAppInLibraries(libraryVDF, PZ_APP_ID, "common", "ProjectZomboid")
 	}
 
 	return "", fmt.Errorf("could not find Project Zomboid installation")
@@ -553,13 +553,13 @@ func detectZBPath(steamPath string) (string, error) {
 	// Then check libraryfolders.vdf
 	libraryVDF := filepath.Join(steamPath, "steamapps", "libraryfolders.vdf")
 	if _, err := os.Stat(libraryVDF); err == nil {
-		return findAppInLibraries(libraryVDF, "workshop", "content", PZ_APP_ID, ZB_MOD_ID)
+		return findAppInLibraries(libraryVDF, PZ_APP_ID, "workshop", "content", PZ_APP_ID, ZB_MOD_ID)
 	}
 
 	return "", fmt.Errorf("Make sure you've subscribed to https://steamcommunity.com/sharedfiles/filedetails/?id=3619862853")
 }
 
-func findAppInLibraries(libraryVDFPath string, subPath ...string) (string, error) {
+func findAppInLibraries(libraryVDFPath string, appID string, subPath ...string) (string, error) {
 	m, err := parseVDFMap(libraryVDFPath)
 	if err != nil {
 		return "", err
@@ -578,6 +578,14 @@ func findAppInLibraries(libraryVDFPath string, subPath ...string) (string, error
 
 		path, ok := folderMap["path"].(string)
 		if !ok {
+			continue
+		}
+
+		if appsMap, ok := folderMap["apps"].(map[string]interface{}); ok {
+			if _, hasApp := appsMap[appID]; !hasApp {
+				continue
+			}
+		} else {
 			continue
 		}
 

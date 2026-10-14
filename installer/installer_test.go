@@ -36,15 +36,23 @@ func TestFindAppInLibraries(t *testing.T) {
 			}
 
 			vdfContent := "\"libraryfolders\"\n{\n" +
-				"\t\"0\"\n\t{\n\t\t\"path\"\t\t\"" + libs[0] + "\"\n\t}\n" +
-				"\t\"1\"\n\t{\n\t\t\"path\"\t\t\"" + libs[1] + "\"\n\t}\n" +
+				"\t\"0\"\n\t{\n\t\t\"path\"\t\t\"" + strings.ReplaceAll(libs[0], "\\", "\\\\") + "\"\n"
+			if tt.inLib == 0 {
+				vdfContent += "\t\t\"apps\"\n\t\t{\n\t\t\t\"108600\"\t\t\"123\"\n\t\t}\n"
+			}
+			vdfContent += "\t}\n" +
+				"\t\"1\"\n\t{\n\t\t\"path\"\t\t\"" + strings.ReplaceAll(libs[1], "\\", "\\\\") + "\"\n"
+			if tt.inLib == 1 {
+				vdfContent += "\t\t\"apps\"\n\t\t{\n\t\t\t\"108600\"\t\t\"123\"\n\t\t}\n"
+			}
+			vdfContent += "\t}\n" +
 				"}\n"
 			vdfPath := filepath.Join(tmpDir, "libraryfolders.vdf")
 			if err := os.WriteFile(vdfPath, []byte(vdfContent), 0644); err != nil {
 				t.Fatal(err)
 			}
 
-			got, err := findAppInLibraries(vdfPath, "common", "ProjectZomboid")
+			got, err := findAppInLibraries(vdfPath, "108600", "common", "ProjectZomboid")
 			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got path %q", got)
