@@ -241,17 +241,57 @@ public class zbUtils {
         return Reflect.on(obj).field(name).set(value);
     }
 
+
+    private static Object[] tryMatchAndConvert(Class<?>[] paramTypes, Object[] args) {
+        if (paramTypes.length != args.length) return null;
+        Object[] converted = new Object[args.length];
+
+        for (int i = 0; i < args.length; i++) {
+            Class<?> paramType = paramTypes[i];
+            Object arg = args[i];
+
+            if (arg == null) {
+                if (paramType.isPrimitive()) return null;
+                converted[i] = null;
+                continue;
+            }
+
+            if (paramType.isInstance(arg)) {
+                converted[i] = arg;
+                continue;
+            }
+
+            if (arg instanceof Double d) {
+                if (paramType == int.class || paramType == Integer.class) { converted[i] = d.intValue(); continue; }
+                if (paramType == float.class || paramType == Float.class) { converted[i] = d.floatValue(); continue; }
+                if (paramType == long.class || paramType == Long.class) { converted[i] = d.longValue(); continue; }
+                if (paramType == byte.class || paramType == Byte.class) { converted[i] = d.byteValue(); continue; }
+                if (paramType == short.class || paramType == Short.class) { converted[i] = d.shortValue(); continue; }
+            }
+
+            if (paramType == boolean.class && arg instanceof Boolean) { converted[i] = arg; continue; }
+            if (paramType == char.class && arg instanceof Character) { converted[i] = arg; continue; }
+
+            return null;
+        }
+
+        return converted;
+    }
+
     @LuaMethod(name = "zbcall", global = true)
     public static Object zbCall(Object obj, String name, Object... args) throws Exception {
         if (obj == null || Utils.isBlank(name)) {
             throw new IllegalArgumentException("object and method name must be provided");
         }
         for (Method m : Reflect.on(obj).methods()) {
-            if (m.getName().equals(name) && m.getParameterCount() == args.length) { // TODO: match parameter types?
-                return m.invoke(obj, args);
+            if (m.getName().equals(name)) {
+                Object[] convertedArgs = tryMatchAndConvert(m.getParameterTypes(), args);
+                if (convertedArgs != null) {
+                    return m.invoke(obj, convertedArgs);
+                }
             }
         }
-        throw new IllegalArgumentException("no matching method found: " + name + " with " + args.length + " args");
+        throw new IllegalArgumentException("no matching method found: " + name + " with matching arg types");
     }
 
     /**
