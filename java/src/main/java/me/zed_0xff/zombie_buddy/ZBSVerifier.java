@@ -188,6 +188,10 @@ public final class ZBSVerifier {
             }
         }
         try {
+            if (jarPath != null && ModSignatureCache.isCachedValid(jarPath)) {
+                return new ValidSignature(sid, pubHexes);
+            }
+
             String canonical = "ZBS:" + sid.value() + ":" + jarSha256Hex.toLowerCase(Locale.ROOT);
             byte[] msg = canonical.getBytes(StandardCharsets.UTF_8);
             HexFormat hexFormat = HexFormat.of();
@@ -207,6 +211,9 @@ public final class ZBSVerifier {
                 signer.update(msg, 0, msg.length);
                 boolean ok = signer.verifySignature(sig);
                 if (ok) {
+                    if (jarPath != null) {
+                        ModSignatureCache.cacheVerified(jarPath);
+                    }
                     return new ValidSignature(sid, pubHexes);
                 }
             }
