@@ -37,6 +37,7 @@ public class HttpServer {
     
     // Timeout for waiting for Lua task execution (in milliseconds)
     public static long luaTaskTimeoutMs = 5000;
+    public static String luaApiToken = null;
     public static int g_verbosity = 0;
     
     // Queue for Lua tasks to be executed on the main thread (for dedicated servers)

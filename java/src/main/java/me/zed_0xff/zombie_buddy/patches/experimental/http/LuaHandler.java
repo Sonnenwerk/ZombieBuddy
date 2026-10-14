@@ -52,6 +52,32 @@ public class LuaHandler implements HttpHandler {
 
     private static void handleRequest(HttpExchange exchange) throws Exception {
         HttpServer.logRequest(exchange);
+
+        if (HttpServer.luaApiToken == null) {
+            HttpServer.sendResponse(exchange, 500, "Internal Server Error: API Token not configured\n");
+            return;
+        }
+
+        String token = null;
+        List<String> authHeaders = exchange.getRequestHeaders().get("Authorization");
+        if (authHeaders != null && !authHeaders.isEmpty()) {
+            String auth = authHeaders.get(0);
+            if (auth.startsWith("Bearer ")) {
+                token = auth.substring(7);
+            }
+        }
+        if (token == null) {
+            List<String> zbTokenHeaders = exchange.getRequestHeaders().get("X-ZB-API-Token");
+            if (zbTokenHeaders != null && !zbTokenHeaders.isEmpty()) {
+                token = zbTokenHeaders.get(0);
+            }
+        }
+
+        if (token == null || !java.security.MessageDigest.isEqual(HttpServer.luaApiToken.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8))) {
+            HttpServer.sendResponse(exchange, 401, "Unauthorized: Invalid or missing token\n");
+            return;
+        }
+
         if (!_lua_ready) {
             HttpServer.sendResponse(exchange, 503, "Lua not initialized yet\n");
             return;

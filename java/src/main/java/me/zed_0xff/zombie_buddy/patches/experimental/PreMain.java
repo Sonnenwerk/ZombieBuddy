@@ -3,6 +3,8 @@ package me.zed_0xff.zombie_buddy.patches.experimental;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 import me.zed_0xff.zombie_buddy.*;
 
@@ -15,8 +17,29 @@ public class PreMain {
         String hostValue    = Agent.arguments.get("lua_server_host");
         String portValue    = Agent.arguments.get("lua_server_port");
         String timeoutValue = Agent.arguments.get("lua_task_timeout");
+        String apiToken     = Agent.arguments.get("lua_api_token");
 
         if (!Utils.isBlank(portValue)) {
+            if (Utils.isBlank(apiToken)) {
+                SecureRandom random = new SecureRandom();
+                byte[] tokenBytes = new byte[24];
+                random.nextBytes(tokenBytes);
+                apiToken = Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
+                Logger.info("Generated random Lua API token: " + apiToken);
+
+                try {
+                    Path tokenFile = Path.of(Utils.getCacheDir(), "zbLuaAPI_token.txt");
+                    Files.writeString(tokenFile, apiToken);
+                    Logger.info("Wrote random API token to " + tokenFile.toAbsolutePath());
+                } catch (IOException e) {
+                    Logger.error("Failed to write token file: " + e.getMessage());
+                    Logger.printStackTrace(e);
+                }
+            } else {
+                Logger.info("Using configured Lua API token");
+            }
+            HttpServer.luaApiToken = apiToken;
+
             try {
                 int serverPort;
                 boolean isRandomPort = false;
