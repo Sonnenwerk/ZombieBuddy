@@ -95,11 +95,11 @@ public final class ModApprovalsStore {
     }
 
     static Path jsonPath() {
-        return Agent.configDir().resolve(JSON_FILE_NAME);
+        return ZombieBuddyAgent.configDir().resolve(JSON_FILE_NAME);
     }
 
     static Path legacyTxtPath() {
-        return Agent.configDir().resolve(LEGACY_TXT_FILE_NAME);
+        return ZombieBuddyAgent.configDir().resolve(LEGACY_TXT_FILE_NAME);
     }
 
     static FileData load() {

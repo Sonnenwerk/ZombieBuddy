@@ -55,7 +55,8 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
-            'Premain-Class': 'me.zed_0xff.zombie_buddy.Agent',
+            'Premain-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
+            'Agent-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
             'Can-Redefine-Classes': 'true',
             'Can-Retransform-Classes': 'true',
             'Implementation-Version': version
@@ -68,7 +69,8 @@ shadowJar {
     archiveClassifier.set("")
     manifest {
         attributes(
-            'Premain-Class': 'me.zed_0xff.zombie_buddy.Agent',
+            'Premain-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
+            'Agent-Class': 'me.zed_0xff.zombie_buddy.ZombieBuddyAgent',
             'Can-Redefine-Classes': 'true',
             'Can-Retransform-Classes': 'true',
             'Implementation-Version': version
@@ -170,6 +172,8 @@ java {
     // makes java version a part of cache key for all compile tasks
     languageVersion = JavaLanguageVersion.of((project.findProperty('javaVersion') ?: DEFAULT_JVM).toInteger())
   }
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
 }
 
 sourceSets {

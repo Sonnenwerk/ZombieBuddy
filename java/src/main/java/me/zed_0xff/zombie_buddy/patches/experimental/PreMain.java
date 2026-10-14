@@ -11,10 +11,10 @@ public class PreMain {
         JavaStateDumper.init();
         WatchesAPI.init();
 
-        // Configure HTTP server host, port and timeout from Agent.arguments (if provided)
-        String hostValue    = Agent.arguments.get("lua_server_host");
-        String portValue    = Agent.arguments.get("lua_server_port");
-        String timeoutValue = Agent.arguments.get("lua_task_timeout");
+        // Configure HTTP server host, port and timeout from ZombieBuddyAgent.arguments (if provided)
+        String hostValue    = ZombieBuddyAgent.arguments.get("lua_server_host");
+        String portValue    = ZombieBuddyAgent.arguments.get("lua_server_port");
+        String timeoutValue = ZombieBuddyAgent.arguments.get("lua_task_timeout");
 
         if (!Utils.isBlank(portValue)) {
             try {
@@ -53,7 +53,7 @@ public class PreMain {
             }
         }
 
-        // Configure Lua task timeout from Agent.arguments (if provided)
+        // Configure Lua task timeout from ZombieBuddyAgent.arguments (if provided)
         if (!Utils.isBlank(timeoutValue)) {
             try {
                 HttpServer.luaTaskTimeoutMs = Long.parseLong(timeoutValue);

@@ -64,7 +64,7 @@ public final class SteamWorkshop {
     private static final ConcurrentHashMap<String, CachedResponse> HTTP_CACHE = new ConcurrentHashMap<>();
 
     private static int parseHttpCacheTTL() {
-        return Math.max(0, Agent.getArgInt("http_cache_ttl", 3600));
+        return Math.max(0, ZombieBuddyAgent.getArgInt("http_cache_ttl", 3600));
     }
 
     static String getCachedBody(String url, String requestBody) {
@@ -97,7 +97,7 @@ public final class SteamWorkshop {
     }
 
     private static Duration parseHttpTimeout() {
-        return Duration.ofSeconds(Agent.getArgInt("http.client.timeout", DEFAULT_TIMEOUT));
+        return Duration.ofSeconds(ZombieBuddyAgent.getArgInt("http.client.timeout", DEFAULT_TIMEOUT));
     }
 
     private SteamWorkshop() {}

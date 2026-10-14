@@ -36,7 +36,7 @@ record Config(
     }
 
     static Path jsonPath() {
-        return Agent.configDir().resolve(JSON_FILE_NAME);
+        return ZombieBuddyAgent.configDir().resolve(JSON_FILE_NAME);
     }
 
     static Config load() {
