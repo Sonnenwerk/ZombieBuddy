@@ -166,7 +166,7 @@ public class Logger {
     }
 
     public static void printStackTrace(Throwable t, int maxFrames) {
-        boolean bFilter = Agent.arguments.containsKey("filter_stacktrace"); // undocumented; intentionally omitted from CommandLine.md
+        boolean bFilter = ZombieBuddyAgent.arguments.containsKey("filter_stacktrace"); // undocumented; intentionally omitted from CommandLine.md
         if (!bFilter && maxFrames < 0) {
             t.printStackTrace();
             return;

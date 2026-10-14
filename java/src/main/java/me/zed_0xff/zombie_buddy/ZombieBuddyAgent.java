@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import me.zed_0xff.zombie_buddy.frontend.ModApprovalFrontends;
 import zombie.core.Core;
 
-public class Agent {
+public class ZombieBuddyAgent {
     public static final Map<String, String> arguments = new HashMap<>();
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final ClassLoader _systemLoader = ClassLoader.getSystemClassLoader();
@@ -123,7 +123,7 @@ public class Agent {
         
         // Register onGameInitComplete hooks based on arguments
         if (arguments.containsKey("exit_after_game_init")) {
-            Callbacks.onGameInitComplete.register(Agent::exitOnGameInitComplete);
+            Callbacks.onGameInitComplete.register(ZombieBuddyAgent::exitOnGameInitComplete);
         }
 
         if (arguments.containsKey("expose_classes")) {
@@ -140,7 +140,7 @@ public class Agent {
         Logger.info("Agent installed.");
 
         Logger.debug("system classloader: " + _systemLoader);
-        Logger.debug("Agent  classloader: " + Agent.class.getClassLoader());
+        Logger.debug("Agent  classloader: " + ZombieBuddyAgent.class.getClassLoader());
         Logger.debug("ZB     classloader: " + ZombieBuddy.class.getClassLoader());
 
         Loader.preloadMods();

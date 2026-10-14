@@ -1,6 +1,6 @@
 package me.zed_0xff.zombie_buddy.patches.experimental;
 
-import me.zed_0xff.zombie_buddy.Agent;
+import me.zed_0xff.zombie_buddy.ZombieBuddyAgent;
 import me.zed_0xff.zombie_buddy.Callbacks;
 import me.zed_0xff.zombie_buddy.Logger;
 import me.zed_0xff.zombie_buddy.annotations.Patch;
@@ -21,8 +21,8 @@ public class Patch_LuaManager {
             Callbacks.afterLuaInit.run();
             if (!isInitialized) {
                 isInitialized = true;
-                if (Agent.arguments.containsKey("lua_init_script")) {
-                    String initScript = Agent.arguments.get("lua_init_script");
+                if (ZombieBuddyAgent.arguments.containsKey("lua_init_script")) {
+                    String initScript = ZombieBuddyAgent.arguments.get("lua_init_script");
                     Logger.info("Running init script: " + initScript);
                     LuaManager.RunLua(initScript);
                 }

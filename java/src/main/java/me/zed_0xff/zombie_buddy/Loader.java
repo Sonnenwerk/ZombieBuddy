@@ -70,7 +70,7 @@ public class Loader {
     private static final String POLICY_ALLOW_ALL    = "allow-all";
     private static final Set<String> VALID_POLICIES = Set.of(POLICY_PROMPT, POLICY_DENY_NEW, POLICY_ALLOW_ALL);
 
-    // Write-once policy: must be set during Agent.premain, before any other Java
+    // Write-once policy: must be set during ZombieBuddyAgent.premain, before any other Java
     // mod is on the classpath. Subsequent set attempts are logged and ignored,
     // so a later-loading Java mod cannot call Loader.setPolicy("allow-all").
     // (Reflection/bytecode-redefinition can still bypass this — same threat
@@ -166,13 +166,13 @@ public class Loader {
     /** Set in {@link #configureApprovalFrontend}; resolved lazily — do not touch LWJGL during agent {@code premain}. */
     private static String g_approvalFrontendConfig = ModApprovalFrontends.ARG_AUTO;
 
-    /** Called from {@link Agent#premain} to load config from disk before any mod loading. */
+    /** Called from {@link ZombieBuddyAgent#premain} to load config from disk before any mod loading. */
     static void initConfig() {
         g_config = Config.load();
         g_configDirty = false;
     }
 
-    /** Called from {@link Agent#premain} with {@code frontend=...} (default {@code auto}). */
+    /** Called from {@link ZombieBuddyAgent#premain} with {@code frontend=...} (default {@code auto}). */
     static void configureApprovalFrontend(String value) {
         String v = value == null ? "" : value.trim();
         synchronized (g_approvalFrontendLock) {
@@ -497,7 +497,7 @@ public class Loader {
         }
     }
 
-    // called by Agent and Loader
+    // called by ZombieBuddyAgent and Loader
     static boolean loadJar(Path jarPath, String packageName, String approvedHash, Phase phase) {
         if (!Files.isRegularFile(jarPath)) {
             Logger.error("JAR not found: " + jarPath);
@@ -1070,7 +1070,7 @@ public class Loader {
     private static final Set<String> _known_mains = new HashSet<>();
     private static final HashMap<String, EnumSet<Phase>> _known_package_phases = new HashMap<>();
 
-    // called by Agent and Loader
+    // called by ZombieBuddyAgent and Loader
     static boolean ApplyPatchesFromPackage(String packageName, Path jarPath, Phase phase) {
         Logger.debug("Loader.ApplyPatchesFromPackage", packageName, jarPath.getFileName(), phase);
         ClassLoader modLoader = g_mod_loaders.get(jarPath);

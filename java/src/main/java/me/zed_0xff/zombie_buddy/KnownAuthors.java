@@ -63,7 +63,7 @@ public final class KnownAuthors {
     private KnownAuthors() {}
 
     public static Path cachePath() {
-        return Agent.configDir().resolve(CACHE_FILE_NAME);
+        return ZombieBuddyAgent.configDir().resolve(CACHE_FILE_NAME);
     }
 
     /**
@@ -147,7 +147,7 @@ public final class KnownAuthors {
 
     private static void writeCache(String body) {
         try {
-            Files.createDirectories(Agent.configDir());
+            Files.createDirectories(ZombieBuddyAgent.configDir());
             Utils.writeFileAtomic(cachePath(), body, StandardCharsets.UTF_8);
         } catch (IOException e) {
             Logger.warn("Could not write author names cache: " + e.getMessage());
