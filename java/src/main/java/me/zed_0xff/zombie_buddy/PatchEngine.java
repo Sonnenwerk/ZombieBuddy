@@ -319,7 +319,7 @@ public final class PatchEngine {
                                 ClassFileLocator locator = classFileLocator(transformedJar, modLoader);
                                 result = result.visit(Advice.to(patchClass, locator).on(methodMatcher));
                                 Logger.debug("Applied advice to " + className + "." + methodName);
-                            } catch (Exception e) {
+                            } catch (Throwable e) {
                                 Logger.error("ERROR: Failed to apply advice to " + className + "." + methodName + ": " + e.getMessage());
                                 if (Loader.g_verbosity > 0) {
                                     Logger.printStackTrace(e);
@@ -378,9 +378,16 @@ public final class PatchEngine {
                                     .intercept(SuperMethodCall.INSTANCE.andThen(MethodDelegation.to(patchClass)));
                             }
                         } else {
-                            result = result
-                                .method(SyntaxSugar.methodMatcher(methodName))
-                                .intercept(MethodDelegation.to(patchClass));
+                            try {
+                                result = result
+                                    .method(SyntaxSugar.methodMatcher(methodName))
+                                    .intercept(MethodDelegation.to(patchClass));
+                            } catch (Throwable t) {
+                                Logger.error("ERROR: Could not set up method delegation for " + className + "." + methodName + ": " + t.getMessage());
+                                if (Loader.g_verbosity > 0) {
+                                    Logger.printStackTrace(t);
+                                }
+                            }
                         }
                     }
                     
@@ -698,7 +705,9 @@ public final class PatchEngine {
                             Class<?> expected = entry.getValue();
                             if (expected == Object.class) continue;
                             net.bytebuddy.description.type.TypeDescription actual = target.getParameters().get(idx).getType().asErasure();
-                            if (!actual.isAssignableTo(expected)) {
+                            if (!actual.isAssignableTo(expected)
+                                    && !actual.getName().equals(expected.getName())
+                                    && !actual.getSimpleName().equals(expected.getSimpleName())) {
                                 allArgsMatch = false;
                                 break;
                             }
