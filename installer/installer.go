@@ -93,6 +93,8 @@ func main() {
 		result = install()
 	case "uninstall":
 		result = uninstall()
+	case "verify":
+		result = verify()
 	case "nothing":
 		fmt.Println("\nOkay, nothing changed.")
 		waitForExit()
@@ -106,6 +108,8 @@ func main() {
 			fmt.Println("\nInstallation complete! You can now start Steam and launch Project Zomboid.")
 		case "uninstall":
 			fmt.Println("\nUninstall complete! You can now start Steam and launch Project Zomboid.")
+		case "verify":
+			fmt.Println("\nVerification complete.")
 		}
 	case resultCancelled:
 		fmt.Println("\nNothing changed.")
@@ -127,17 +131,19 @@ func promptAction() (string, error) {
 		lines: []string{
 			"  1) Install ZombieBuddy",
 			"  2) Uninstall ZombieBuddy",
-			"  3) Nothing, thanks!",
+			"  3) Verify Installation",
+			"  4) Nothing, thanks!",
 			"",
 			"Any system changes will be shown for confirmation before they are applied.",
 		},
-		prompt:  "Choose 1, 2, or 3: ",
+		prompt:  "Choose 1, 2, 3, or 4: ",
 		eofErr:  "no action selected",
-		invalid: "Please choose 1 for install, 2 for uninstall, or 3 to do nothing.",
+		invalid: "Please choose 1 for install, 2 for uninstall, 3 for verify, or 4 to do nothing.",
 		options: []promptOption{
 			{value: "install", keys: []string{"1", "i", "install"}},
 			{value: "uninstall", keys: []string{"2", "u", "uninstall"}},
-			{value: "nothing", keys: []string{"3", "n", "nothing", "no", "exit", "quit"}},
+			{value: "verify", keys: []string{"3", "v", "verify"}},
+			{value: "nothing", keys: []string{"4", "n", "nothing", "no", "exit", "quit"}},
 		},
 	})
 }
@@ -270,6 +276,8 @@ func displayAction(action string) string {
 		return "Installation"
 	case "uninstall":
 		return "Uninstall"
+	case "verify":
+		return "Verification"
 	case "nothing":
 		return "Nothing"
 	default:
@@ -344,6 +352,91 @@ func install() operationResult {
 		}
 	}
 
+	return resultSucceeded
+}
+
+func verify() operationResult {
+	fmt.Println("\nStarting verification...")
+	paths, err := detectInstallPaths(false)
+	if err != nil {
+		fmt.Printf("[!] Error detecting paths: %v\n", err)
+		return resultFailed
+	}
+
+	success := true
+
+	// Check core files
+	fmt.Println("\nChecking core files...")
+	for _, filename := range []string{"zbNative.dll", "ZombieBuddy.jar"} {
+		filePath := filepath.Join(paths.pz, filename)
+		f, err := os.Open(filePath)
+		if err != nil {
+			fmt.Printf("[!] Error: Could not open %s (missing or permission denied): %v\n", filename, err)
+			success = false
+		} else {
+			f.Close()
+			fmt.Printf("[OK] %s is present and readable.\n", filename)
+		}
+	}
+
+	// Check JRE bin directory
+	fmt.Println("\nChecking JRE directories...")
+	jreBin := filepath.Join(paths.pz, "jre64", "bin")
+	if info, err := os.Stat(jreBin); err == nil && info.IsDir() {
+		fmt.Printf("[OK] JRE bin directory found at %s\n", jreBin)
+	} else {
+		fmt.Printf("[!] Error: JRE bin directory not found at %s. Ensure Project Zomboid is installed correctly.\n", jreBin)
+		success = false
+	}
+
+	// Check launch parameters
+	fmt.Println("\nChecking launch parameters...")
+	jsonPath := filepath.Join(paths.pz, "ProjectZomboid64.json")
+	hasJSON, err := jsonLauncherHasZombieBuddy(jsonPath)
+	if err != nil {
+		fmt.Printf("[!] Error checking ProjectZomboid64.json: %v\n", err)
+		success = false
+	} else if hasJSON {
+		fmt.Printf("[OK] ProjectZomboid64.json is correctly configured.\n")
+	} else {
+		fmt.Printf("[-] ProjectZomboid64.json does not contain ZombieBuddy agent.\n")
+	}
+
+	batchPath := filepath.Join(paths.pz, "ProjectZomboid64.bat")
+	hasBatch, err := batchFileHasZombieBuddy(batchPath)
+	if err != nil {
+		fmt.Printf("[!] Error checking ProjectZomboid64.bat: %v\n", err)
+		success = false
+	} else if hasBatch {
+		fmt.Printf("[OK] ProjectZomboid64.bat is correctly configured.\n")
+	} else {
+		fmt.Printf("[-] ProjectZomboid64.bat does not contain ZombieBuddy agent.\n")
+	}
+
+	steamPaths, err := steamLaunchOptionRemovalPlan(paths.steam)
+	if err != nil {
+		fmt.Printf("[!] Error checking Steam launch options: %v\n", err)
+		success = false
+	} else if len(steamPaths) > 0 {
+		for _, sp := range steamPaths {
+			fmt.Printf("[OK] Steam launch options correctly configured in %s.\n", sp)
+		}
+	} else {
+		fmt.Printf("[-] Steam launch options do not contain ZombieBuddy agent.\n")
+	}
+
+	if !hasJSON && !hasBatch && len(steamPaths) == 0 {
+		fmt.Printf("[!] Error: ZombieBuddy agent is not configured in any launch method.\n")
+		success = false
+	}
+
+	if err := testLoadDLL(paths.pz); err != nil {
+		success = false
+	}
+
+	if !success {
+		return resultFailed
+	}
 	return resultSucceeded
 }
 
