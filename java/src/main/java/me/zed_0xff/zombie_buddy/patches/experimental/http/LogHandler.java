@@ -16,6 +16,10 @@ public class LogHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         HttpServer.logRequest(exchange);
+
+        if (!HttpServer.getInstance().checkAuth(exchange)) {
+            return;
+        }
         int lines = HttpServer.parseIntParam(exchange.getRequestURI().getQuery(), "lines", 100);
         String logPath = ExpUtils.getConsoleLogPath();
 

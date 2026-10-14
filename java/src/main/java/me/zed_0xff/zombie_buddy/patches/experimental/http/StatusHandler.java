@@ -11,6 +11,7 @@ public class StatusHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         HttpServer.logRequest(exchange);
+        // Status endpoint is public for health checks
         String response = "ok\n";
         HttpServer.sendResponse(exchange, 200, response);
     }

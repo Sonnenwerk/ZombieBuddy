@@ -15,6 +15,7 @@ public class PreMain {
         String hostValue    = Agent.arguments.get("lua_server_host");
         String portValue    = Agent.arguments.get("lua_server_port");
         String timeoutValue = Agent.arguments.get("lua_task_timeout");
+        String passwordValue = Agent.arguments.get("lua_server_password");
 
         if (!Utils.isBlank(portValue)) {
             try {
@@ -34,7 +35,7 @@ public class PreMain {
 
                 HttpServer.g_verbosity = Logger.getLevel();
                 String bindHost = (!Utils.isBlank(hostValue)) ? hostValue : "127.0.0.1";
-                HttpServer httpServer = new HttpServer(bindHost, serverPort, isRandomPort);
+                HttpServer httpServer = new HttpServer(bindHost, serverPort, isRandomPort, passwordValue);
                 httpServer.start();
 
                 // Register hook to write the random port file on game init
