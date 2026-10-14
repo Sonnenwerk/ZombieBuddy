@@ -72,18 +72,6 @@ public class Exposer {
         return new ArrayList<>(g_classesWithGlobalLuaMethod);
     }
 
-    @Deprecated(since = "2026-05-01", forRemoval = true)
-    public static void exposeClassToLua(Class<?> cls) {
-        Logger.warn("exposeClassToLua() method is deprecated, use exposeClass() or @LuaClass annotation instead");
-        exposeClass(cls, null);
-    }
-
-    @Deprecated(since = "2026-05-01", forRemoval = true)
-    public static boolean exposeClassToLua(String className) {
-        Logger.warn("exposeClassToLua() method is deprecated, use exposeClass() or @LuaClass annotation instead");
-        return exposeClass(className);
-    }
-
     public static void exposeClass(Class<?> cls) {
         LuaClass ann = cls.getAnnotation(LuaClass.class);
         exposeClass(cls, ann != null ? ann.name() : null);
